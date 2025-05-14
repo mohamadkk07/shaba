@@ -1,0 +1,40 @@
+.home-container {
+  padding: 20px;
+  background-color: #f0fdf4;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.section-title {
+  color: #065f46;
+  margin-bottom: 16px;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.video-card {
+  background-color: #ffffff;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.video-card video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.video-info {
+  padding: 10px;
+  color: #065f46;
+}
+
+.reactions {
+  margin-top: 5px;
+  font-size: 14px;
+}

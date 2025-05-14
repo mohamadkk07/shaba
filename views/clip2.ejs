@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>مشاهدة المقطع</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+        video {
+            margin-top: 20px;
+            max-width: 90%;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="hidden"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>🎥 مشاهدة المقطع</h2>
+    <video id="videoPlayer" controls>
+        <source src="/clips/<%= clipName %>" type="video/mp4">
+        المتصفح لا يدعم تشغيل الفيديو.
+    </video>
+
+    <div class="controls">
+        <button onclick="setStartTime()">📍 بداية الفيديو</button>
+        <button onclick="setEndTime()">🏁 نهاية الفيديو</button>
+        <button onclick="downloadClip()">✂️ تحميل الفيديو المقصوص</button>
+    </div>
+
+    <form id="clipForm" method="POST" action="/generate-clip">
+        <input type="hidden" name="filename" value="<%= clipName %>">
+        <input type="hidden" name="startTime" id="startTime">
+        <input type="hidden" name="endTime" id="endTime">
+    </form>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const startTimeInput = document.getElementById('startTime');
+        const endTimeInput = document.getElementById('endTime');
+
+        function setStartTime() {
+            startTimeInput.value = video.currentTime;
+            alert("تم تعيين بداية القصة عند: " + video.currentTime.toFixed(2) + " ثانية");
+        }
+
+        function setEndTime() {
+            endTimeInput.value = video.currentTime;
+            alert("تم تعيين نهاية القصة عند: " + video.currentTime.toFixed(2) + " ثانية");
+        }
+
+        function downloadClip() {
+            if (!startTimeInput.value || !endTimeInput.value) {
+                alert("يرجى تعيين وقت البداية والنهاية أولاً.");
+                return;
+            }
+            document.getElementById('clipForm').submit();
+        }
+    </script>
+</body>
+</html>

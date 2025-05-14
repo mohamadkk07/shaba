@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>الصفحة الرئيسية</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #28a745;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 5px solid #218838;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            font-size: 18px;
+            color: #555;
+        }
+
+        .actions {
+            margin-top: 30px;
+        }
+
+        .actions a {
+            display: inline-block;
+            margin: 10px;
+            padding: 12px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .actions a:hover {
+            background: #218838;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🏟️ مرحباً بك في ملعب الشهباء</h1>
+</div>
+
+<div class="container">
+    <h2>أهلاً، <%= user %> 👋</h2>
+    <p>سعيدون بانضمامك إلينا! يمكنك الآن استعراض المقاطع، قصها، أو التفاعل مع محتوى اللاعبين.</p>
+
+    <div class="actions">
+        <a href="/">🎥 استعراض الفيديوهات</a>
+        <a href="/user/profile">👤 الملف الشخصي</a>
+        <a href="/logout">🚪 تسجيل الخروج</a>
+    </div>
+</div>
+
+</body>
+</html>

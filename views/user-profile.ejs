@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ملفي الشخصي - <%= user.username %></title>
+    <link rel="stylesheet" href="/styles/style.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f7f9fc;
+            padding: 20px;
+            color: #333;
+        }
+
+        .profile-box {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: auto;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #00509e;
+        }
+
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #00509e;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #003f7f;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            justify-content: center;
+            padding: 0 10px;
+        }
+
+        .clip-card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .clip-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .clip-card video {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+
+        .clip-card p {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .no-clips {
+            text-align: center;
+            font-size: 18px;
+            color: #888;
+            margin-top: 50px;
+        }
+
+        .like-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 22px;
+            margin-top: 10px;
+            color: #e74c3c;
+            transition: transform 0.2s ease, color 0.3s ease;
+        }
+
+        .like-btn:hover {
+            color: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .like-count {
+            font-size: 14px;
+            margin-right: 4px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- الملف الشخصي -->
+    <div class="profile-box">
+        <h2>👤 الملف الشخصي</h2>
+        <p><strong>الاسم:</strong> <%= user.username %></p>
+        <p><strong>البريد الإلكتروني:</strong> <%= user.email || 'غير محدد' %></p>
+        <a class="back-button" href="/user/home">العودة للصفحة الرئيسية</a>
+    </div>
+
+    <!-- المقاطع الخاصة بالمستخدم -->
+    <h1>مقاطع <%= user.username %></h1>
+
+    <% if (clips.length === 0) { %>
+        <p class="no-clips">لا يوجد مقاطع حتى الآن.</p>
+    <% } else { %>
+        <div class="video-grid">
+            <% clips.forEach(clip => { %>
+                <div class="clip-card">
+                    <video controls>
+                        <source src="/clips/cut/<%= clip.filename %>" type="video/mp4">
+                        المتصفح لا يدعم الفيديو.
+                    </video>
+                    <p>تم الإنشاء في: <%= new Date(clip.createdAt).toLocaleString('ar-EG') %></p>
+
+                    <!-- زر الإعجاب -->
+                    <button class="like-btn" data-id="<%= clip._id %>">
+    ❤️ <span class="like-count"><%= clip.likes %></span>
+</button>
+
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
+
+    <!-- سكريبت اللايكات -->
+     <script>
+    console.log('جلسة المستخدم:', <%= JSON.stringify(user) %>);
+</script>
+
+    <script>
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            const buttons = document.querySelectorAll(".like-btn");
+
+            buttons.forEach(button => {
+                button.addEventListener("click", async () => {
+                    const clipId = button.dataset.id;
+                    button.disabled = true;
+
+                    try {
+                        const response = await fetch(`/like/${clipId}`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            }
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            const countSpan = button.querySelector(".like-count");
+                            countSpan.textContent = data.likes;
+
+                            button.style.transform = "scale(1.3)";
+                            setTimeout(() => {
+                                button.style.transform = "scale(1)";
+                            }, 200);
+                        } else {
+                            alert("لم يتم تسجيل الإعجاب. تأكد من تسجيل الدخول.");
+                        }
+                    } catch (error) {
+                        console.error("خطأ في تسجيل الإعجاب:", error);
+                        alert("حدث خطأ أثناء تسجيل الإعجاب.");
+                    }
+
+                    button.disabled = false;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

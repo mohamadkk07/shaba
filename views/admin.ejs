@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة تحكم - ملعب الشهباء</title>
+    <style>
+        body { font-family: sans-serif; background: #f9f9f9; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px #ccc; }
+        select, input, button { margin: 5px 0; padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; width: 100%; }
+        button { background: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background: #218838; }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h2>🏟️ لوحة التحكم - ملعب الشهباء الرياضي</h2>
+
+    <!-- نموذج إنشاء مقطع من فيديو أصلي -->
+ <form id="clipForm" method="POST" action="/generate-clip">
+    <label>اختر الفيديو:</label>
+    <select name="filename" id="videoSelector" onchange="loadSelectedVideo()">
+        <% videoFiles.forEach(function(file) { %>
+            <option value="<%= file %>"><%= file %></option>
+        <% }); %>
+    </select>
+
+    <video id="videoPlayer" width="100%" controls style="margin-top: 10px;">
+        <source src="/videos/<%= videoFiles[0] %>" type="video/mp4">
+    </video>
+
+    <label>وقت البداية:</label>
+    <input type="text" name="startTime" id="startTime" placeholder="00:00:00">
+
+    <label>وقت النهاية:</label>
+    <input type="text" name="endTime" id="endTime" placeholder="00:00:10">
+
+    <button type="button" onclick="setStartTime()">📍 بداية الوقت</button>
+    <button type="button" onclick="setEndTime()">🏁 نهاية الوقت</button>
+
+    <button type="submit">✂️ إنشاء رابط للمقطع</button>
+</form>
+
+
+    <!-- اختيار هدف الأسبوع من المقاطع -->
+    <h1>اختيار هدف الأسبوع</h1>
+<form action="/admin/set-goal" method="POST">
+    <label for="goalVideo">اختر فيديو هدف الأسبوع:</label>
+    <select name="goalVideo" id="goalVideo" required>
+        <% clipFiles.forEach(function(video) { %>
+            <option value="<%= video %>" <%= goalVideo === video ? 'selected' : '' %>><%= video %></option>
+        <% }); %>
+    </select>
+    <button type="submit">تعيين هدف الأسبوع</button>
+</form>
+
+</div>
+
+<script>
+    const video = document.getElementById("videoPlayer");
+    const videoSelector = document.getElementById("videoSelector");
+
+    function formatTime(seconds) {
+        const date = new Date(0);
+        date.setSeconds(seconds);
+        return date.toISOString().substr(11, 8);
+    }
+
+    function setStartTime() {
+        document.getElementById("startTime").value = formatTime(Math.floor(video.currentTime));
+    }
+
+    function setEndTime() {
+        document.getElementById("endTime").value = formatTime(Math.floor(video.currentTime));
+    }
+
+    function loadSelectedVideo() {
+        const filename = videoSelector.value;
+        video.querySelector("source").src = "/videos/" + filename;
+        video.load();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Hub</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">🏆 ملعب الشهباء الرياضي</div>
+        <nav>
+            <a href="/">الرئيسية</a>
+            <% if (session && session.loggedIn) { %>
+                <a href="/user/profile">الملف الشخصي</a>
+                <a href="/logout">تسجيل الخروج</a>
+            <% } else { %>
+                <a href="/user/login">تسجيل الدخول</a>
+            <% } %>
+        </nav>
+    </header>
+
+    <main>
+        <!-- هدف الأسبوع -->
+        <section class="goal-section">
+            <h2>هدف الأسبوع</h2>
+            <% if (goalVideo) { %>
+                <div class="goal-video">
+                    <video controls class="goal-video-player">
+                        <source src="/clips/<%= goalVideo %>" type="video/mp4">
+                        متصفحك لا يدعم تشغيل الفيديو.
+                    </video>
+                </div>
+            <% } else { %>
+                <p>لم يتم تعيين هدف الأسبوع بعد.</p>
+            <% } %>
+        </section>
+
+        <!-- الفيديوهات -->
+        <section class="videos-section">
+            <h2>الفيديوهات المميزة</h2>
+            <div class="videos-container">
+                <% videoFiles.forEach(function(video) { 
+                    const alreadyLiked = likes && likes[video.filename] && likes[video.filename].includes(session?.user);
+                %>
+                    <div class="video-card">
+                        <video controls>
+                            <source src="/clips/cut/<%= video.filename %>" type="video/mp4">
+                            متصفحك لا يدعم تشغيل الفيديو.
+                        </video>
+                        
+                        <div class="video-info">
+                            <p>شارك الفيديو بواسطة: 
+                                <% if (video.username !== 'مجهول') { %>
+                                    <a href="/user/<%= video.username %>/clips"><%= video.username %></a>
+                                <% } else { %>
+                                    مجهول
+                                <% } %>
+                            </p>
+                        </div>
+
+                        <div class="interactions">
+                            <% if (session && session.loggedIn) { %>
+                               <button class="like-btn"
+        data-video-id="<%= video.filename %>"
+        data-liked="<%= alreadyLiked %>">
+    <span class="heart-icon">
+        <%= alreadyLiked ? '❤️' : '🤍' %>
+    </span>
+</button>
+
+                            <% } else { %>
+                                <p><a href="/user/login">سجل الدخول</a> للإعجاب</p>
+                            <% } %>
+
+                            <p>عدد الإعجابات: <span id="like-count-<%= video.filename %>">
+                                <%= likes && likes[video.filename] ? likes[video.filename].length : 0 %>
+                            </span></p>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 ملعب الشهباء الرياضي</p>
+    </footer>
+
+    <!-- داخل ملف EJS في الأسفل -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".like-btn").forEach(button => {
+        button.addEventListener("click", async (e) => {
+            e.preventDefault();
+
+            const videoId = button.getAttribute("data-video-id");
+
+            const response = await fetch("/like-video", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ videoId })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                // تحديث الأيقونة
+                const icon = button.querySelector(".heart-icon");
+                if (icon) {
+                    icon.textContent = result.liked ? "❤️" : "🤍";
+                }
+
+                // تحديث عدد الإعجابات
+                const likeCountEl = document.getElementById("like-count-" + videoId);
+                if (likeCountEl) {
+                    likeCountEl.textContent = result.likeCount;
+                }
+
+                // تحديث data-liked
+                button.setAttribute("data-liked", result.liked);
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>
+

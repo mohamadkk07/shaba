@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>مشاهدة المقطع</title>
+    <style>
+        body { font-family: sans-serif; background: #f9f9f9; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px #ccc; }
+        select, input, button { margin: 5px 0; padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; width: 100%; }
+        button { background: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background: #218838; }
+        video { margin-top: 20px; max-width: 100%; border-radius: 10px; border: 2px solid #28a745; }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h2>🎥 مشاهدة المقطع</h2>
+
+    <video id="videoPlayer" controls>
+        <source src="/clips/<%= clipName %>" type="video/mp4">
+        المتصفح لا يدعم تشغيل الفيديو.
+    </video>
+
+    <label>وقت البداية:</label>
+    <input type="text" name="startTime" id="startTime" placeholder="00:00:00">
+
+    <label>وقت النهاية:</label>
+    <input type="text" name="endTime" id="endTime" placeholder="00:00:10">
+
+    <button type="button" onclick="setStartTime()">📍 بداية الوقت</button>
+    <button type="button" onclick="setEndTime()">🏁 نهاية الوقت</button>
+
+    <input type="hidden" id="clipName" value="<%= clipName %>">
+
+    <div style="margin-top: 20px;">
+        <button type="button" onclick="shareClip()">📤 قص ومشاركة</button>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById("videoPlayer");
+
+    function formatTime(seconds) {
+        const date = new Date(0);
+        date.setSeconds(Math.floor(seconds));
+        return date.toISOString().substr(11, 8);
+    }
+
+    function setStartTime() {
+        document.getElementById("startTime").value = formatTime(video.currentTime);
+    }
+
+    function setEndTime() {
+        document.getElementById("endTime").value = formatTime(video.currentTime);
+    }
+
+    async function downloadClip() {
+        const startTime = document.getElementById("startTime").value;
+        const endTime = document.getElementById("endTime").value;
+        const filename = document.getElementById("clipName").value;
+
+        if (!startTime || !endTime) {
+            alert("يرجى تعيين وقت البداية والنهاية أولاً.");
+            return;
+        }
+
+        const response = await fetch("/download-clip", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filename, startTime, endTime })
+        });
+
+        if (response.status === 401) {
+            alert("يجب تسجيل الدخول أولاً لتحميل المقطع.");
+            window.location.href = "/user/login";
+            return;
+        }
+
+        if (!response.ok) {
+            alert("فشل في إنشاء المقطع");
+            return;
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "clip.mp4";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+async function shareClip() {
+    const startTime = document.getElementById("startTime").value;
+    const endTime = document.getElementById("endTime").value;
+    const filename = document.getElementById("clipName").value;
+
+    if (!startTime || !endTime) {
+        alert("يرجى تعيين وقت البداية والنهاية أولاً.");
+        return;
+    }
+
+    const response = await fetch("/share-clip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename, startTime, endTime })
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+        if (result.redirectToLogin) {
+            alert("يرجى تسجيل الدخول أولاً.");
+            window.location.href = "/user/login";
+        } else {
+            alert("فشل في مشاركة المقطع: " + (result.message || "خطأ غير معروف"));
+        }
+        return;
+    }
+
+    alert("تم قص ومشاركة المقطع بنجاح!");
+}
+
+</script>
+
+</body>
+</html>
